@@ -283,14 +283,18 @@ async def global_exception_handler(request, exc):
 
 if __name__ == "__main__":
 
+    
     port = int(os.environ.get("PORT", 8000))
+    
+    print(f" Starting server on 0.0.0.0:{port}")
     
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host="0.0.0.0",  # Required: listen on all interfaces
         port=port,
-        reload=False,  
-        workers=1,     
+        reload=False,    # Never use reload in production
+        workers=1,       # Render handles horizontal scaling
         log_level="info",
         access_log=True
     )
+
