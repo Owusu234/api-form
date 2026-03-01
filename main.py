@@ -56,3 +56,7 @@ def diabetes_pred(input_parameters: ModelInput):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "message": "Service is running"}
