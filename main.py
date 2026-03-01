@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pickle
-import json
+import os
 
 app = FastAPI()
 
@@ -12,44 +12,47 @@ origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin=origins,
+    allow_origins=origins,  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    )
+)
 
-class model_input(BaseModel):
-    Pregnancies : int
-    Glucose : int
-    BloodPressure : int
-    SkinThickness : int
-    Insulin : int
-    BMI : float
-    DiabetesPedigreeFunction : float
-    Age : int
+class ModelInput(BaseModel):
+    Pregnancies: int
+    Glucose: int
+    BloodPressure: int
+    SkinThickness: int
+    Insulin: int
+    BMI: float
+    DiabetesPedigreeFunction: float
+    Age: int
 
-# loading the saved model
-diabetes_model = pickle.load(open("diabetes_model.pkl","rb"))
+# Load the saved model
+try:
+    diabetes_model = pickle.load(open("diabetes_model.pkl", "rb"))
+except FileNotFoundError:
+    raise RuntimeError("diabetes_model.pkl not found. Ensure it's committed to your repo.")
 
 @app.post("/diabetes_prediction")
-def diabetes_pred(input_parameters : model_input):
-    input_data = input_parameters.json()
-    input_dictionary = json.loads(input_data)
-    
-    preg = input_dictionary["Pregnancies"]
-    glu = input_dictionary["Glucose"]
-    bp = input_dictionary["BloodPressure"]
-    skin = input_dictionary["SkinThickness"]
-    insulin = input_dictionary["Insulin"]
-    bmi = input_dictionary["BMI"]
-    dpf = input_dictionary["DiabetesPedigreeFunction"]
-    age = input_dictionary["Age"]
-    
-    input_list = [preg, glu, bp, skin, insulin, bmi, dpf, age]
-    
-    prediction = diabetes_model.predict([input_list])
-    
-    if prediction[0] == 0:
-        return "You are not Diabetic"
-    else: 
-        return "You are Diabetic"
+def diabetes_pred(input_parameters: ModelInput):
+    try:
+        # Extract values directly from Pydantic model (cleaner than JSON parsing)
+        input_list = [
+            input_parameters.Pregnancies,
+            input_parameters.Glucose,
+            input_parameters.BloodPressure,
+            input_parameters.SkinThickness,
+            input_parameters.Insulin,
+            input_parameters.BMI,
+            input_parameters.DiabetesPedigreeFunction,
+            input_parameters.Age
+        ]
+        
+        prediction = diabetes_model.predict([input_list])
+        
+        result = "You are not Diabetic" if prediction[0] == 0 else "You are Diabetic"
+        return {"prediction": result, "status": "success"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
