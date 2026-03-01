@@ -5,3 +5,4 @@ uvicorn
 pickles
 pypi-json
 pydantic
+imbalanced-learn
