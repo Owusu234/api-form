@@ -1,8 +1,0 @@
-scikit-learn
-requests
-fastapi
-uvicorn
-pickles
-pypi-json
-pydantic
-imbalanced-learn
