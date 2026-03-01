@@ -48,9 +48,8 @@ print("\nCreating new features...")
 diabetes_dataset['Glucose_Age'] = diabetes_dataset['Glucose'] * diabetes_dataset['Age'] / 100
 diabetes_dataset['BMI_Insulin'] = diabetes_dataset['BMI'] * diabetes_dataset['Insulin'] / 100
 
-# =============================================================================
 # PREPARE DATA
-# =============================================================================
+
 X = diabetes_dataset.drop(columns='Outcome')
 y = diabetes_dataset['Outcome']
 
